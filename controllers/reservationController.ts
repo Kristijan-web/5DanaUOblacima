@@ -1,3 +1,3 @@
 import catchAsync from "../utills/catchAsync";
 
-const createReservation = catchAsync(async (req, res, next) => {});
+export const createReservation = catchAsync(async (req, res, next) => {});
