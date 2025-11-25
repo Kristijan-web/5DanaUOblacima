@@ -8,6 +8,11 @@ const studentSchema = new mongoose_1.default.Schema({
     ime: String,
     prezime: String,
     email: String,
+    role: {
+        type: String,
+        enum: ["admin", "student"],
+        default: "student",
+    },
 });
 const studentModel = mongoose_1.default.model("student", studentSchema);
 exports.default = studentModel;
