@@ -19,12 +19,14 @@ const canteenSchema = new mongoose_1.default.Schema({
         required: [true, "Capacity is required"],
     },
     workingHours: {
-        type: {
-            meal: String,
-            from: String,
-            to: String,
-        },
-        required: [true, "Working hours are required"],
+        type: [
+            {
+                meal: { type: String, required: true },
+                from: { type: String, required: true },
+                to: { type: String, required: true },
+            },
+        ],
+        required: true,
     },
 });
 const Canteen = mongoose_1.default.model("Canteen", canteenSchema);

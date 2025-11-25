@@ -15,12 +15,14 @@ const canteenSchema = new mongoose.Schema({
     required: [true, "Capacity is required"],
   },
   workingHours: {
-    type: {
-      meal: String,
-      from: String,
-      to: String,
-    },
-    required: [true, "Working hours are required"],
+    type: [
+      {
+        meal: { type: String, required: true },
+        from: { type: String, required: true },
+        to: { type: String, required: true },
+      },
+    ],
+    required: true,
   },
 });
 

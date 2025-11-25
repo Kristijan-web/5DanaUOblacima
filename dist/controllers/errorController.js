@@ -3,7 +3,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const mongodb_1 = require("mongodb");
 const appError_1 = __importDefault(require("../utills/appError"));
+function handleDuplicateKey(err) {
+    let uniqueField;
+    for (const prop in err.keyValue) {
+        uniqueField = prop;
+    }
+    return new appError_1.default(`${uniqueField} vec postoji`, 400);
+}
 function sendDevelopment(error, res) {
     res.status(500).send({
         message: error.message,
@@ -33,6 +41,9 @@ const globalErrorMiddleware = function (error, req, res, next) {
     }
     else {
         let err = error;
+        if (err instanceof mongodb_1.MongoServerError && err.code === 11000) {
+            err = handleDuplicateKey(err);
+        }
         sendProduction(err, res);
     }
 };

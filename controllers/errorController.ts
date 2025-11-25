@@ -3,6 +3,16 @@ import mongoose from "mongoose";
 import AppError from "../utills/appError";
 import { NextFunction, Request, Response } from "express";
 
+function handleDuplicateKey(err: MongoServerError) {
+  let uniqueField;
+
+  for (const prop in err.keyValue) {
+    uniqueField = prop;
+  }
+
+  return new AppError(`${uniqueField} vec postoji`, 400);
+}
+
 function sendDevelopment(error: Error, res: Response) {
   res.status(500).send({
     message: error.message,
@@ -37,6 +47,10 @@ const globalErrorMiddleware = function (
     sendDevelopment(error, res);
   } else {
     let err = error;
+
+    if (err instanceof MongoServerError && err.code === 11000) {
+      err = handleDuplicateKey(err);
+    }
 
     sendProduction(err, res);
   }
