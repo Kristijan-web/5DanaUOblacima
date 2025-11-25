@@ -6,6 +6,11 @@ import jwt from "jsonwebtoken";
 import Student, { StudentType } from "../models/studentModel";
 import sendResponse from "../utills/sendResponse";
 
+interface DecodedJWT {
+  id: string;
+  iat: number;
+}
+
 function checkIfEnvExists(key: string): string {
   const env = process.env[key];
   if (!env) throw new Error(`Missing env var: ${key}`);
@@ -35,9 +40,27 @@ export const protect = catchAsync(async (req, res, next) => {
   // - Provera da li je korisnik ulogovan (Da li postoji JWT token)
   // - Validacija JWT tokena
   // - Provera da li je korisniku u medjuvremenu obrisan nalog
-  // - Provera da li je sifra i dalje validna, to jest ako je korisnik promenio sifru, onda ne bih trebao da moze da radi stari jwt token
   // - Izmeni req objekat i dodaj student-a iz baze req.student = currentstudent i na kraju next()
-  // Kako idu koraci za proveri da li je korisnik ulogovan?
+
+  const jwtToken = req.cookies.jwt;
+
+  if (!jwtToken) {
+    return next(new AppError("You are not logged in!", 401));
+  }
+
+  // jwt.verify ce vratiti payload jwt-a
+  const jwtPayload = jwt.verify(
+    jwtToken,
+    checkIfEnvExists("JWT_SECRET_KEY")
+  ) as DecodedJWT;
+
+  const student = await Student.findById(jwtPayload.id);
+  if (!student) {
+    return next(new AppError("Student does not exist", 404));
+  }
+
+  (req as any).Student = Student;
+  next();
 });
 
 export const signup = catchAsync(async (req, res, next) => {

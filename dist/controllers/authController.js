@@ -36,9 +36,19 @@ exports.protect = (0, catchAsync_1.default)(async (req, res, next) => {
     // - Provera da li je korisnik ulogovan (Da li postoji JWT token)
     // - Validacija JWT tokena
     // - Provera da li je korisniku u medjuvremenu obrisan nalog
-    // - Provera da li je sifra i dalje validna, to jest ako je korisnik promenio sifru, onda ne bih trebao da moze da radi stari jwt token
     // - Izmeni req objekat i dodaj student-a iz baze req.student = currentstudent i na kraju next()
-    // Kako idu koraci za proveri da li je korisnik ulogovan?
+    const jwtToken = req.cookies.jwt;
+    if (!jwtToken) {
+        return next(new appError_1.default("You are not logged in!", 401));
+    }
+    // jwt.verify ce vratiti payload jwt-a
+    const jwtPayload = jsonwebtoken_1.default.verify(jwtToken, checkIfEnvExists("JWT_SECRET_KEY"));
+    const student = await studentModel_1.default.findById(jwtPayload.id);
+    if (!student) {
+        return next(new appError_1.default("Student does not exist", 404));
+    }
+    req.Student = studentModel_1.default;
+    next();
 });
 exports.signup = (0, catchAsync_1.default)(async (req, res, next) => {
     const student = await studentModel_1.default.create({
