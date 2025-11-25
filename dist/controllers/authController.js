@@ -46,7 +46,10 @@ exports.protect = (0, catchAsync_1.default)(async (req, res, next) => {
     // - Validacija JWT tokena
     // - Provera da li je korisniku u medjuvremenu obrisan nalog
     // - Izmeni req objekat i dodaj student-a iz baze req.student = currentstudent i na kraju next()
-    const jwtToken = req.cookies.jwt;
+    // Ovde je greska, ne saljem ajax-om zahtev sa credentials: "include", vec koristim authorization: bearer u Postman-u
+    const jwtToken = req?.cookies?.jwt;
+    console.log("EVO JWT-a", jwtToken);
+    console.log("EVO JWT-a iz header-a", req.headers["jwt"]);
     if (!jwtToken) {
         return next(new appError_1.default("You are not logged in!", 401));
     }
