@@ -1,16 +1,22 @@
-import mongoose from "mongoose";
+import mongoose, { InferSchemaType } from "mongoose";
 
 const studentSchema = new mongoose.Schema({
-  ime: String,
-  prezime: String,
-  email: String,
-  role: {
+  name: {
     type: String,
-    enum: ["admin", "student"],
-    default: "student",
+    required: [true, "Name is required"],
+  },
+  email: {
+    type: String,
+    required: [true, "Email is required"],
+  },
+  isAdmin: {
+    type: Boolean,
+    default: true,
   },
 });
 
-const studentModel = mongoose.model("student", studentSchema);
+const Student = mongoose.model("Student", studentSchema);
 
-export default studentModel;
+export type StudentType = InferSchemaType<typeof studentSchema>;
+
+export default Student;

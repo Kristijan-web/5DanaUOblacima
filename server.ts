@@ -1,8 +1,9 @@
-import app from "./app";
 import dotenv from "dotenv";
 dotenv.config({
-  path: "./.env",
+  path: "./config.env",
 });
+import app from "./app";
+
 import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
 

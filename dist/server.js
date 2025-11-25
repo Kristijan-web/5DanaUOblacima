@@ -3,11 +3,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const app_1 = __importDefault(require("./app"));
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config({
-    path: "./.env",
+    path: "./config.env",
 });
+const app_1 = __importDefault(require("./app"));
 const mongodb_memory_server_1 = require("mongodb-memory-server");
 const mongoose_1 = __importDefault(require("mongoose"));
 let mongoServer = null;

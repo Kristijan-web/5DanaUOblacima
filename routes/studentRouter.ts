@@ -1,8 +1,8 @@
 import express from "express";
-import { createStudent } from "../controllers/studentController";
+import { signup } from "../controllers/authController";
 
 const studentRouter = express.Router();
 
-studentRouter.post("/", createStudent);
+studentRouter.post("/", signup);
 
 export default studentRouter;
