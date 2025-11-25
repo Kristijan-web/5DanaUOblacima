@@ -4,6 +4,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
+const errorController_1 = __importDefault(require("./controllers/errorController"));
+const studentRouter_1 = __importDefault(require("./routes/studentRouter"));
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
+app.use("/students", studentRouter_1.default);
+app.use(errorController_1.default);
 exports.default = app;
