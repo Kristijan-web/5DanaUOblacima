@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.signup = exports.protect = void 0;
+exports.signup = exports.protect = exports.allowedTo = void 0;
 const appError_1 = __importDefault(require("../utills/appError"));
 const catchAsync_1 = __importDefault(require("../utills/catchAsync"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
@@ -31,6 +31,15 @@ function setJWTInHttpOnlyCookie(jwtToken, res) {
     };
     res.cookie("jwt", jwtToken, cookieOptions);
 }
+// Treba da moze da se prosledi parametar allowedTo
+// - Kako cu to da uradim?
+const allowedTo = (...allowedRoles) => (req, res, next) => {
+    if (req.student.isAdmin && allowedRoles.includes("admin")) {
+        next();
+    }
+    return next(new appError_1.default("You are not allowed to perform this action", 401));
+};
+exports.allowedTo = allowedTo;
 exports.protect = (0, catchAsync_1.default)(async (req, res, next) => {
     // Za protect middleware bitno je proveriti sledece edge case-ove
     // - Provera da li je korisnik ulogovan (Da li postoji JWT token)

@@ -1,4 +1,4 @@
-import type { Response, Request, NextFunction } from "express";
+import { type Response, type Request, type NextFunction } from "express";
 import { HydratedDocument } from "mongoose";
 import AppError from "../utills/appError";
 import catchAsync from "../utills/catchAsync";
@@ -34,6 +34,20 @@ function setJWTInHttpOnlyCookie(jwtToken: string, res: Response) {
   };
   res.cookie("jwt", jwtToken, cookieOptions);
 }
+
+// Treba da moze da se prosledi parametar allowedTo
+// - Kako cu to da uradim?
+
+export const allowedTo =
+  (...allowedRoles: string[]) =>
+  (req: Request, res: Response, next: NextFunction) => {
+    if (req.student.isAdmin && allowedRoles.includes("admin")) {
+      next();
+    }
+    return next(
+      new AppError("You are not allowed to perform this action", 401)
+    );
+  };
 
 export const protect = catchAsync(async (req, res, next) => {
   // Za protect middleware bitno je proveriti sledece edge case-ove
