@@ -1,7 +1,10 @@
 import mongoose, { InferSchemaType } from "mongoose";
 
+interface IreservationMethods {
+  isReservationInPast: (date: Date, time: string) => boolean;
+}
+
 const reservationSchema = new mongoose.Schema({
-  // studentId mora biti mongodb id
   studentId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Student",
@@ -26,8 +29,27 @@ const reservationSchema = new mongoose.Schema({
   },
 });
 
-const Reservation = mongoose.model("Reservation", reservationSchema);
+reservationSchema.methods.isReservationInPast = function (
+  date: Date,
+  time: String
+) {
+  const dateTimeString = `${date}T${time}:00`;
 
-export type ReservationType = InferSchemaType<typeof reservationSchema>;
+  const reservationTimeStamp = new Date(dateTimeString).getTime();
+  const currentTimeStamp = Date.now();
+
+  if (reservationTimeStamp < currentTimeStamp) {
+    return true;
+  }
+  return false;
+};
+
+export type ReservationType = InferSchemaType<typeof reservationSchema> &
+  IreservationMethods;
+
+const Reservation = mongoose.model<ReservationType>(
+  "Reservation",
+  reservationSchema
+);
 
 export default Reservation;

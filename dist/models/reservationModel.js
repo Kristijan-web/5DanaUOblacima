@@ -5,7 +5,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
 const reservationSchema = new mongoose_1.default.Schema({
-    // studentId mora biti mongodb id
     studentId: {
         type: mongoose_1.default.Schema.Types.ObjectId,
         ref: "Student",
@@ -29,5 +28,14 @@ const reservationSchema = new mongoose_1.default.Schema({
         required: [true, "Duration is required"],
     },
 });
+reservationSchema.methods.isReservationInPast = function (date, time) {
+    const dateTimeString = `${date}T${time}:00`;
+    const reservationTimeStamp = new Date(dateTimeString).getTime();
+    const currentTimeStamp = Date.now();
+    if (reservationTimeStamp < currentTimeStamp) {
+        return true;
+    }
+    return false;
+};
 const Reservation = mongoose_1.default.model("Reservation", reservationSchema);
 exports.default = Reservation;

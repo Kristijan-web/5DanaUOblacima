@@ -3,7 +3,7 @@ import { createCanteen } from "../controllers/canteenController";
 import { allowedTo, protect } from "../controllers/authController";
 
 const canteenRouter = express.Router();
-
-canteenRouter.post("/", protect, allowedTo("admin"), createCanteen);
+// protect, allowedTo("admin"),
+canteenRouter.post("/", createCanteen);
 
 export default canteenRouter;
