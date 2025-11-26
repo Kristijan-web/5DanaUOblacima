@@ -34,10 +34,10 @@ export const createCanteen = catchAsync(async (req, res, next) => {
 });
 
 export const updateCanteen = catchAsync(async (req, res, next) => {
-  const id = req.params;
+  const { id } = req.params;
 
   // findByIdAndUpdate ne trigeruje mongoose document middleware
-  const updatedCanteen = await Canteen.findByIdAndUpdate(id, req.body.data, {
+  const updatedCanteen = await Canteen.findByIdAndUpdate(id, req.body, {
     new: true,
     runValidators: true,
   });
@@ -46,7 +46,7 @@ export const updateCanteen = catchAsync(async (req, res, next) => {
     return next(new AppError("Something went wrong updating canteen", 400));
   }
 
-  sendResponse(res, 201, updatedCanteen);
+  sendResponse(res, 200, updatedCanteen);
 });
 
 export const deleteCanteen = catchAsync(async (req, res, next) => {
@@ -59,4 +59,8 @@ export const deleteCanteen = catchAsync(async (req, res, next) => {
   }
 
   sendResponse(res, 204, deletedCanteen);
+});
+
+export const getCanteensByStatus = catchAsync(async (req, res, next) => {
+  const { startDate, startTime, endDate, endTime, duration } = req.query;
 });

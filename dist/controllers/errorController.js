@@ -5,6 +5,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongodb_1 = require("mongodb");
 const appError_1 = __importDefault(require("../utills/appError"));
+function handleInvalidId() {
+    return new appError_1.default("Prosledjeni id ne postoji", 404);
+}
 function handleDuplicateKey(err) {
     let uniqueField;
     for (const prop in err.keyValue) {
@@ -41,6 +44,9 @@ const globalErrorMiddleware = function (error, req, res, next) {
     }
     else {
         let err = error;
+        if (err.name === "CastError") {
+            err = handleInvalidId();
+        }
         if (err instanceof mongodb_1.MongoServerError && err.code === 11000) {
             err = handleDuplicateKey(err);
         }

@@ -4,6 +4,7 @@ import {
   deleteCanteen,
   getCanteen,
   getCanteens,
+  getCanteensByStatus,
   updateCanteen,
 } from "../controllers/canteenController";
 import { allowedTo, protect } from "../controllers/authController";
@@ -13,7 +14,9 @@ const canteenRouter = express.Router();
 canteenRouter.get("/", getCanteens);
 canteenRouter.get("/:id", getCanteen);
 canteenRouter.post("/", createCanteen);
-canteenRouter.patch("/:id", updateCanteen);
-canteenRouter.delete("/:Id", deleteCanteen);
+canteenRouter.put("/:id", updateCanteen);
+canteenRouter.delete("/:id", deleteCanteen);
+
+canteenRouter.get("/status", getCanteensByStatus);
 
 export default canteenRouter;
