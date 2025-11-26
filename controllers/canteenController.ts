@@ -15,3 +15,18 @@ export const createCanteen = catchAsync(async (req, res, next) => {
   }
   sendResponse(res, 201, canteen);
 });
+
+export const updateCanteen = catchAsync(async (req, res, next) => {
+  const id = req.params;
+
+  const updatedCanteen = await Canteen.findByIdAndUpdate(id, req.body.data, {
+    new: true,
+    runValidators: true,
+  });
+
+  if (!updatedCanteen) {
+    return next(new AppError("Something went wrong updating canteen", 400));
+  }
+
+  sendResponse(res, 201, updatedCanteen);
+});

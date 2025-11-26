@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createCanteen = void 0;
+exports.updateCanteen = exports.createCanteen = void 0;
 const CanteenModel_1 = __importDefault(require("../models/CanteenModel"));
 const appError_1 = __importDefault(require("../utills/appError"));
 const catchAsync_1 = __importDefault(require("../utills/catchAsync"));
@@ -19,4 +19,15 @@ exports.createCanteen = (0, catchAsync_1.default)(async (req, res, next) => {
         return next(new appError_1.default("Failed to create canteen", 400));
     }
     (0, sendResponse_1.default)(res, 201, canteen);
+});
+exports.updateCanteen = (0, catchAsync_1.default)(async (req, res, next) => {
+    const id = req.params;
+    const updatedCanteen = await CanteenModel_1.default.findByIdAndUpdate(id, req.body.data, {
+        new: true,
+        runValidators: true,
+    });
+    if (!updatedCanteen) {
+        return next(new appError_1.default("Something went wrong updating canteen", 400));
+    }
+    (0, sendResponse_1.default)(res, 201, updatedCanteen);
 });
