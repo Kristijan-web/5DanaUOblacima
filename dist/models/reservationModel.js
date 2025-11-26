@@ -34,7 +34,7 @@ const reservationSchema = new mongoose_1.default.Schema({
         transform(doc, ret) {
             ret.id = ret._id;
             delete ret._id;
-            // delete ret.__v;
+            delete ret.__v;
             return ret;
         },
     },

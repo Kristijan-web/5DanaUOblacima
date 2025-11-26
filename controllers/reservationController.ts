@@ -3,16 +3,24 @@ import AppError from "../utills/appError";
 import catchAsync from "../utills/catchAsync";
 import sendResponse from "../utills/sendResponse";
 
+export const getReservations = catchAsync(async (req, res, next) => {
+  const reservations = await Reservation.find();
+
+  sendResponse(res, 200, reservations);
+});
+
+export const getReservation = catchAsync(async (req, res, next) => {
+  const { id } = req.params;
+  const reservation = await Reservation.findById(id);
+
+  if (!reservation) {
+    return next(new AppError("Reservation not found", 404));
+  }
+
+  sendResponse(res, 200, reservation);
+});
+
 export const createReservation = catchAsync(async (req, res, next) => {
-  // Nije dozvoljeno kreirati rezervaciju za dane u prošlosti.
-  // Znaci treba da uzmem canteenId
-
-  // Mora da napravim timestamp od prosledjenog datuma i vremena i onda da proverim da li je timestmap manji od sadasnjeg vremena
-  // "date": "2025-12-01",
-  // "time": "07:30
-
-  console.log("EVO ID-EVA", req.body.studentId, req.body.canteenId);
-
   const reservation = await Reservation.create({
     studentId: req.body.studentId,
     canteenId: req.body.canteenId,
@@ -23,8 +31,10 @@ export const createReservation = catchAsync(async (req, res, next) => {
   if (!reservation)
     return next(new AppError("Failed to create reservation", 400));
 
-  if (reservation.isReservationInPast(req.body.date, req.body.time))
+  if (reservation.isReservationInPast(req.body.date, req.body.time)) {
     await reservation.deleteOne();
+    return next(new AppError("Can't make reservation in the past", 400));
+  }
   sendResponse(res, 201, reservation);
 });
 

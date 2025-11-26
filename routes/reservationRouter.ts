@@ -1,8 +1,14 @@
 import express from "express";
-import { createReservation } from "../controllers/reservationController";
+import {
+  createReservation,
+  getReservation,
+  getReservations,
+} from "../controllers/reservationController";
 
 const reservationRouter = express.Router();
 
-reservationRouter.post("/", createReservation);
+reservationRouter.get("/", getReservations);
+reservationRouter.get("/:id", getReservation),
+  reservationRouter.post("/", createReservation);
 
 export default reservationRouter;

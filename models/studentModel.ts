@@ -10,6 +10,7 @@ const studentSchema = new mongoose.Schema(
     email: {
       type: String,
       required: [true, "Email is required"],
+      unique: [true, "Email must be unique"],
     },
     isAdmin: {
       type: Boolean,
@@ -22,7 +23,7 @@ const studentSchema = new mongoose.Schema(
       transform(doc, ret) {
         ret.id = ret._id;
         delete (ret as any)._id;
-        // delete ret.__v;
+        delete (ret as any).__v;
         return ret;
       },
     },

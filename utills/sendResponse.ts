@@ -4,9 +4,9 @@ import { Response } from "express";
 function sendResponse<T>(
   res: Response,
   statusCode: number,
-  body: HydratedDocument<T> | HydratedDocument<T>[]
+  data: HydratedDocument<T> | HydratedDocument<T>[]
 ) {
-  res.status(statusCode).json(body);
+  res.status(statusCode).json(data);
 }
 
 export default sendResponse;
