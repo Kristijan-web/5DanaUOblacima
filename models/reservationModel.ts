@@ -87,22 +87,17 @@ reservationSchema.pre(
 reservationSchema.pre("save", async function () {
   // udji u reservations i nadji onu gde se poklapaju id student-a i id canteen-e
 
-  const reservation = await Reservation.findOne({
+  const existing = await Reservation.findOne({
     studentId: this.studentId,
     canteenId: this.canteenId,
+    date: this.date,
+    time: this.time,
+    _id: { $ne: this._id }, // ignorisi trenutni dokument ako postoji
   });
 
-  const dateTimeToSendString = `${this.date}T${this.time}:00`;
-  const dateTimeFromDBString = `${reservation?.date}T${reservation?.time}:00`;
-
-  const dateTimeToSend = new Date(dateTimeToSendString).getTime();
-  const dateTimeFromDB = new Date(dateTimeFromDBString).getTime();
-
-  // ovo nije ni moralo, mogli su stringovi da se porede
-  if (dateTimeToSend === dateTimeFromDB) {
-    console.log("Error");
+  if (existing) {
     return new AppError(
-      "Can't schedule again at the same time in the same canteen",
+      "Can't schedule reservation at the same time in the same canteen",
       400
     );
   }
