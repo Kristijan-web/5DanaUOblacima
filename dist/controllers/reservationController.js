@@ -21,6 +21,14 @@ exports.getReservation = (0, catchAsync_1.default)(async (req, res, next) => {
     (0, sendResponse_1.default)(res, 200, reservation);
 });
 exports.createReservation = (0, catchAsync_1.default)(async (req, res, next) => {
+    // ovde da pozovem find
+    // Sta zelim?
+    // - Da proverim da li postoji vec rezervacija u iste vreme u istoj menzi
+    // - Ne sme da se napravi novi zapis ako vec postoji
+    // Sta je problem?
+    // Ne znam gde da pisem logiku za tu proveru, dal u document middleware-u, dal u query middleware-u ili ovde u controller-u?
+    // Zasto ne document middleware?
+    // - On sadrzi podatke spremne za slanje bazi mogu tu da uzmem id da uradim find
     const reservation = await reservationModel_1.default.create({
         studentId: req.body.studentId,
         canteenId: req.body.canteenId,
@@ -28,21 +36,7 @@ exports.createReservation = (0, catchAsync_1.default)(async (req, res, next) => 
         time: req.body.time,
         duration: req.body.duration,
     });
-    // NE valja sto ispod koristim intance metode
-    // Bolje je koristeci pre document middlware da izvrsi proveru podataka pre nego sto su uopste poslati u bazu
-    // Ovde proveravam podatke nakon sto su vraceni iz baze
     if (!reservation)
         return next(new appError_1.default("Failed to create reservation", 400));
-    if (reservation.isReservationInPast(req.body.date, req.body.time)) {
-        await reservation.deleteOne();
-        return next(new appError_1.default("Can't make reservation in the past", 400));
-    }
-    if (!reservation.isReservationOnFullHourOrHalfHour) {
-        return next(new appError_1.default("You can only create reservation on full hour or half an hour", 400));
-    }
-    // Student ne bih trebao da moze da napravi istu rezervaciju za isti vremenski interval?
-    // - Mora da se ode u bazu i proveri da li postoji rezervacija sa studentskim id-em u reservations kolekciji
-    // mogu da koristim post document middlware, koji ce se izvrsiti nad vracenim document-om iz baze
     (0, sendResponse_1.default)(res, 201, reservation);
 });
-// Pretvori _id u id

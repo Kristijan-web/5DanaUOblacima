@@ -5,6 +5,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
 const appError_1 = __importDefault(require("../utills/appError"));
+// interface IreservationMethods {
+//   isReservationInPast: (date: Date, time: string) => boolean;
+//   isReservationOnFullHourOrHalfHour: (time: string) => boolean;
+// }
 const reservationSchema = new mongoose_1.default.Schema({
     id: Object,
     studentId: {
@@ -43,26 +47,52 @@ const reservationSchema = new mongoose_1.default.Schema({
 // @ts-ignore
 reservationSchema.pre(
 // @ts-ignore
-"save", function (next) {
+"save", async function () {
     // Middleware proverava da li je u pitanju rezervacija u proslosti
     const dateTimeString = `${this.date}T${this.time}:00`;
     const reservationTimeStamp = new Date(dateTimeString).getTime();
     const currentTimeStamp = Date.now();
     if (reservationTimeStamp < currentTimeStamp) {
-        return next(new Error("Can't create reservation in the past"));
+        return new appError_1.default("Can't create reservation in the past", 400);
     }
-    next();
 });
 reservationSchema.pre(
 // @ts-ignore
-"save", function (next) {
+"save", async function () {
     // Middleware koji proverava da li je rezervacija na pola sata ili sat
     const minutes = this.time?.split(":")[1];
-    if (minutes === "30" || minutes === "60") {
-        next(new appError_1.default("You can only create reservation on full hour or half an hour", 400));
+    if (minutes !== "30" && minutes !== "00") {
+        return new appError_1.default("You can only create reservation on full hour or half an hour", 400);
     }
+});
+reservationSchema.pre("save", async function () {
+    // udji u reservations i nadji onu gde se poklapaju id student-a i id canteen-e
+    const reservation = await Reservation.findOne({
+        studentId: this.studentId,
+        canteenId: this.canteenId,
+    });
+    const dateTimeToSendString = `${this.date}T${this.time}:00`;
+    const dateTimeFromDBString = `${reservation?.date}T${reservation?.time}:00`;
+    const dateTimeToSend = new Date(dateTimeToSendString).getTime();
+    const dateTimeFromDB = new Date(dateTimeFromDBString).getTime();
+    // ovo nije ni moralo, mogli su stringovi da se porede
+    if (dateTimeToSend === dateTimeFromDB) {
+        console.log("Error");
+        return new appError_1.default("Can't schedule again at the same time in the same canteen", 400);
+    }
+});
+reservationSchema.pre(
+// @ts-ignore
+"find", function (next) {
+    // treba da se izvrsi populate za studentId i canteenId
+    this.populate({ path: "studentId" }).populate("canteenId");
     next();
 });
+reservationSchema.methods.doesSameReservationForSameCanteenExist = {
+// Koraci
+// - Uzimam poslat id studenta i canteen-a
+// - Proveravam da li reservations za odredjenu canteen-u postoji ista rezervacija student-a
+};
 const Reservation = mongoose_1.default.model("Reservation", reservationSchema);
 exports.default = Reservation;
 // reservationSchema.methods.isReservationInPast = function (

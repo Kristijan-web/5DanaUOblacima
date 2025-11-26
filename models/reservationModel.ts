@@ -2,17 +2,20 @@ import mongoose, {
   CallbackWithoutResultAndOptionalError,
   HydratedDocument,
   InferSchemaType,
+  Query,
 } from "mongoose";
 import AppError from "../utills/appError";
+import Canteen from "./CanteenModel";
 
-interface IreservationMethods {
-  isReservationInPast: (date: Date, time: string) => boolean;
-  isReservationOnFullHourOrHalfHour: (time: string) => boolean;
-}
+// interface IreservationMethods {
+//   isReservationInPast: (date: Date, time: string) => boolean;
+//   isReservationOnFullHourOrHalfHour: (time: string) => boolean;
+// }
 
 const reservationSchema = new mongoose.Schema(
   {
     id: Object,
+
     studentId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Student",
@@ -53,10 +56,7 @@ const reservationSchema = new mongoose.Schema(
 reservationSchema.pre(
   // @ts-ignore
   "save",
-  function (
-    this: HydratedDocument<ReservationType>,
-    next: CallbackWithoutResultAndOptionalError
-  ) {
+  async function (this: HydratedDocument<ReservationType>) {
     // Middleware proverava da li je u pitanju rezervacija u proslosti
 
     const dateTimeString = `${this.date}T${this.time}:00`;
@@ -64,36 +64,73 @@ reservationSchema.pre(
     const currentTimeStamp = Date.now();
 
     if (reservationTimeStamp < currentTimeStamp) {
-      return next(new Error("Can't create reservation in the past"));
+      return new AppError("Can't create reservation in the past", 400);
     }
-
-    next();
   }
 );
 
 reservationSchema.pre(
   // @ts-ignore
   "save",
-  function (
-    this: HydratedDocument<ReservationType>,
-    next: CallbackWithoutResultAndOptionalError
-  ) {
+  async function (this: HydratedDocument<ReservationType>) {
     // Middleware koji proverava da li je rezervacija na pola sata ili sat
     const minutes = this.time?.split(":")[1];
-    if (minutes === "30" || minutes === "60") {
-      next(
-        new AppError(
-          "You can only create reservation on full hour or half an hour",
-          400
-        )
+    if (minutes !== "30" && minutes !== "00") {
+      return new AppError(
+        "You can only create reservation on full hour or half an hour",
+        400
       );
     }
+  }
+);
+
+reservationSchema.pre("save", async function () {
+  // udji u reservations i nadji onu gde se poklapaju id student-a i id canteen-e
+
+  const reservation = await Reservation.findOne({
+    studentId: this.studentId,
+    canteenId: this.canteenId,
+  });
+
+  const dateTimeToSendString = `${this.date}T${this.time}:00`;
+  const dateTimeFromDBString = `${reservation?.date}T${reservation?.time}:00`;
+
+  const dateTimeToSend = new Date(dateTimeToSendString).getTime();
+  const dateTimeFromDB = new Date(dateTimeFromDBString).getTime();
+
+  // ovo nije ni moralo, mogli su stringovi da se porede
+  if (dateTimeToSend === dateTimeFromDB) {
+    console.log("Error");
+    return new AppError(
+      "Can't schedule again at the same time in the same canteen",
+      400
+    );
+  }
+});
+
+reservationSchema.pre(
+  // @ts-ignore
+  "find",
+  function (
+    this: Query<ReservationType[], ReservationType>,
+    next: CallbackWithoutResultAndOptionalError
+  ) {
+    // treba da se izvrsi populate za studentId i canteenId
+    this.populate({ path: "studentId" }).populate("canteenId");
     next();
   }
 );
 
-export type ReservationType = InferSchemaType<typeof reservationSchema> &
-  IreservationMethods;
+reservationSchema.methods.doesSameReservationForSameCanteenExist = {
+  // Koraci
+  // - Uzimam poslat id studenta i canteen-a
+  // - Proveravam da li reservations za odredjenu canteen-u postoji ista rezervacija student-a
+};
+
+// mozda cak i koristim pre document middleware
+// pre nego se napravi zapis u bazi koristim poslate podatke da dohvatim zapis u bazi i proverim da li vec postoji
+
+export type ReservationType = InferSchemaType<typeof reservationSchema>;
 
 const Reservation = mongoose.model<ReservationType>(
   "Reservation",
