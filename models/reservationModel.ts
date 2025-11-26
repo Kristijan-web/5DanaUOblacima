@@ -49,39 +49,6 @@ const reservationSchema = new mongoose.Schema(
   }
 );
 
-// reservationSchema.pre<
-//   HydratedDocument<ReservationType>, // tip dokumenta
-//   CallbackWithoutResultAndOptionalError // tip next-a
-// >(`save`, async function (next: CallbackWithoutResultAndOptionalError) {
-//   // const dateTimeString = `${this.date}T${this.time}:00`;
-//   // const reservationTimeStamp = new Date(dateTimeString).getTime();
-//   // const currentTimeStamp = Date.now();
-
-//   // if (reservationTimeStamp < currentTimeStamp) {
-//   //   return next(new AppError("Can't create reservations in the past", 400));
-//   // }
-//   next();
-// });
-
-// reservationSchema.pre(
-//   "save",
-//   function (
-//     this: HydratedDocument<ReservationType>,
-//     next: CallbackWithoutResultAndOptionalError
-//   ) {
-//     const isoDate = this.date.toISOString().split("T")[0];
-//     const dateTimeString = `${isoDate}T${this.time}:00`;
-
-//     const reservationTS = new Date(dateTimeString).getTime();
-//     const now = Date.now();
-
-//     if (reservationTS < now) {
-//       throw new AppError("Can't create reservations in the past", 400);
-//     }
-//     next();
-//   }
-// );
-
 // @ts-ignore
 reservationSchema.pre(
   // @ts-ignore
@@ -90,10 +57,8 @@ reservationSchema.pre(
     this: HydratedDocument<ReservationType>,
     next: CallbackWithoutResultAndOptionalError
   ) {
-    // "this" predstavlja dokument koji se snima u bazu
-    console.log("Pre-save middleware radi");
+    // Middleware proverava da li je u pitanju rezervacija u proslosti
 
-    // primer — validacija datuma
     const dateTimeString = `${this.date}T${this.time}:00`;
     const reservationTimeStamp = new Date(dateTimeString).getTime();
     const currentTimeStamp = Date.now();
@@ -106,55 +71,26 @@ reservationSchema.pre(
   }
 );
 
-// reservationSchema.pre<
-//   HydratedDocument<ReservationType>,
-//   CallbackWithoutResultAndOptionalError
-// >(
-//   "init",
-//   function (
-//     this: HydratedDocument<ReservationType>,
-//     next: CallbackWithoutResultAndOptionalError
-//   ) {
-//     const isoDate = this.date.toISOString().split("T")[0];
-//     const dateTimeString = `${isoDate}T${this.time}:00`;
-
-//     const reservationTS = new Date(dateTimeString).getTime();
-//     const now = Date.now();
-
-//     if (reservationTS < now) {
-//       return next(new AppError("Can't create reservations in the past", 400));
-//     }
-
-//     next();
-//   }
-// );
-
-reservationSchema.methods.isReservationInPast = function (
-  date: Date,
-  time: String
-) {
-  const dateTimeString = `${date}T${time}:00`;
-
-  const reservationTimeStamp = new Date(dateTimeString).getTime();
-  const currentTimeStamp = Date.now();
-
-  if (reservationTimeStamp < currentTimeStamp) {
-    return true;
+reservationSchema.pre(
+  // @ts-ignore
+  "save",
+  function (
+    this: HydratedDocument<ReservationType>,
+    next: CallbackWithoutResultAndOptionalError
+  ) {
+    // Middleware koji proverava da li je rezervacija na pola sata ili sat
+    const minutes = this.time?.split(":")[1];
+    if (minutes === "30" || minutes === "60") {
+      next(
+        new AppError(
+          "You can only create reservation on full hour or half an hour",
+          400
+        )
+      );
+    }
+    next();
   }
-  return false;
-};
-
-reservationSchema.methods.isReservationOnFullHourOrHalfHour = function (
-  time: string
-) {
-  // Kako da proverim da li je rezervacija na pola sata ili pun sat?
-  // - Ako se zavrsava sa :00 onda je pun sat ako je :30 onda je pola sata sve sto je razlicito je false
-  const minutes = time.split(":")[1];
-  if (minutes === "30" || minutes === "60") {
-    return true;
-  }
-  return false;
-};
+);
 
 export type ReservationType = InferSchemaType<typeof reservationSchema> &
   IreservationMethods;
@@ -165,3 +101,30 @@ const Reservation = mongoose.model<ReservationType>(
 );
 
 export default Reservation;
+
+// reservationSchema.methods.isReservationInPast = function (
+//   date: Date,
+//   time: String
+// ) {
+//   const dateTimeString = `${date}T${time}:00`;
+
+//   const reservationTimeStamp = new Date(dateTimeString).getTime();
+//   const currentTimeStamp = Date.now();
+
+//   if (reservationTimeStamp < currentTimeStamp) {
+//     return true;
+//   }
+//   return false;
+// };
+
+// reservationSchema.methods.isReservationOnFullHourOrHalfHour = function (
+//   time: string
+// ) {
+//   // Kako da proverim da li je rezervacija na pola sata ili pun sat?
+//   // - Ako se zavrsava sa :00 onda je pun sat ako je :30 onda je pola sata sve sto je razlicito je false
+//   const minutes = time.split(":")[1];
+//   if (minutes === "30" || minutes === "60") {
+//     return true;
+//   }
+//   return false;
+// };
