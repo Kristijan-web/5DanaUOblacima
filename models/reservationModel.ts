@@ -4,30 +4,44 @@ interface IreservationMethods {
   isReservationInPast: (date: Date, time: string) => boolean;
 }
 
-const reservationSchema = new mongoose.Schema({
-  studentId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Student",
-    required: true,
+const reservationSchema = new mongoose.Schema(
+  {
+    id: Object,
+    studentId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Student",
+      required: true,
+    },
+    canteenId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Canteen",
+      required: true,
+    },
+    date: {
+      type: Date,
+      required: [true, "Date is required"],
+    },
+    time: {
+      type: String,
+      requierd: [true, "Time is required"],
+    },
+    duration: {
+      type: Number,
+      required: [true, "Duration is required"],
+    },
   },
-  canteenId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Canteen",
-    required: true,
-  },
-  date: {
-    type: Date,
-    required: [true, "Date is required"],
-  },
-  time: {
-    type: String,
-    requierd: [true, "Time is required"],
-  },
-  duration: {
-    type: Number,
-    required: [true, "Duration is required"],
-  },
-});
+  {
+    toJSON: {
+      virtuals: true,
+      transform(doc, ret) {
+        ret.id = ret._id;
+        delete (ret as any)._id;
+        // delete ret.__v;
+        return ret;
+      },
+    },
+  }
+);
 
 reservationSchema.methods.isReservationInPast = function (
   date: Date,

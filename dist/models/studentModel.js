@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
 const studentSchema = new mongoose_1.default.Schema({
+    id: Object,
     name: {
         type: String,
         required: [true, "Name is required"],
@@ -16,6 +17,16 @@ const studentSchema = new mongoose_1.default.Schema({
     isAdmin: {
         type: Boolean,
         default: true,
+    },
+}, {
+    toJSON: {
+        virtuals: true,
+        transform(doc, ret) {
+            ret.id = ret._id;
+            delete ret._id;
+            // delete ret.__v;
+            return ret;
+        },
     },
 });
 const Student = mongoose_1.default.model("Student", studentSchema);

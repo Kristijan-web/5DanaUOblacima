@@ -5,6 +5,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
 const canteenSchema = new mongoose_1.default.Schema({
+    id: {
+        type: Object,
+    },
     name: {
         type: String,
         required: [true, "Name is required"],
@@ -27,6 +30,16 @@ const canteenSchema = new mongoose_1.default.Schema({
             },
         ],
         required: true,
+    },
+}, {
+    toJSON: {
+        virtuals: true,
+        transform(doc, ret) {
+            ret.id = ret._id;
+            delete ret._id;
+            // delete ret.__v;
+            return ret;
+        },
     },
 });
 const Canteen = mongoose_1.default.model("Canteen", canteenSchema);

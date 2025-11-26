@@ -11,6 +11,8 @@ export const createReservation = catchAsync(async (req, res, next) => {
   // "date": "2025-12-01",
   // "time": "07:30
 
+  console.log("EVO ID-EVA", req.body.studentId, req.body.canteenId);
+
   const reservation = await Reservation.create({
     studentId: req.body.studentId,
     canteenId: req.body.canteenId,
@@ -25,3 +27,5 @@ export const createReservation = catchAsync(async (req, res, next) => {
     await reservation.deleteOne();
   sendResponse(res, 201, reservation);
 });
+
+// Pretvori _id u id

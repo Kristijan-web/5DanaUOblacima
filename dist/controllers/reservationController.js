@@ -14,6 +14,7 @@ exports.createReservation = (0, catchAsync_1.default)(async (req, res, next) => 
     // Mora da napravim timestamp od prosledjenog datuma i vremena i onda da proverim da li je timestmap manji od sadasnjeg vremena
     // "date": "2025-12-01",
     // "time": "07:30
+    console.log("EVO ID-EVA", req.body.studentId, req.body.canteenId);
     const reservation = await reservationModel_1.default.create({
         studentId: req.body.studentId,
         canteenId: req.body.canteenId,
@@ -27,3 +28,4 @@ exports.createReservation = (0, catchAsync_1.default)(async (req, res, next) => 
         await reservation.deleteOne();
     (0, sendResponse_1.default)(res, 201, reservation);
 });
+// Pretvori _id u id

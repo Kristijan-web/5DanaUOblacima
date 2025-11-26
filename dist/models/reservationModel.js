@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
 const reservationSchema = new mongoose_1.default.Schema({
+    id: Object,
     studentId: {
         type: mongoose_1.default.Schema.Types.ObjectId,
         ref: "Student",
@@ -26,6 +27,16 @@ const reservationSchema = new mongoose_1.default.Schema({
     duration: {
         type: Number,
         required: [true, "Duration is required"],
+    },
+}, {
+    toJSON: {
+        virtuals: true,
+        transform(doc, ret) {
+            ret.id = ret._id;
+            delete ret._id;
+            // delete ret.__v;
+            return ret;
+        },
     },
 });
 reservationSchema.methods.isReservationInPast = function (date, time) {

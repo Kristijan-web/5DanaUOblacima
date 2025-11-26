@@ -19,6 +19,7 @@ export const createCanteen = catchAsync(async (req, res, next) => {
 export const updateCanteen = catchAsync(async (req, res, next) => {
   const id = req.params;
 
+  // findByIdAndUpdate ne trigeruje mongoose document middleware
   const updatedCanteen = await Canteen.findByIdAndUpdate(id, req.body.data, {
     new: true,
     runValidators: true,
