@@ -12,11 +12,10 @@ import { allowedTo, protect } from "../controllers/authController";
 const canteenRouter = express.Router();
 // protect, allowedTo("admin"),
 canteenRouter.get("/", getCanteens);
+canteenRouter.get("/status", getCanteensByStatus);
 canteenRouter.get("/:id", getCanteen);
 canteenRouter.post("/", createCanteen);
 canteenRouter.put("/:id", updateCanteen);
 canteenRouter.delete("/:id", deleteCanteen);
-
-canteenRouter.get("/status", getCanteensByStatus);
 
 export default canteenRouter;

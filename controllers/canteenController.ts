@@ -62,5 +62,46 @@ export const deleteCanteen = catchAsync(async (req, res, next) => {
 });
 
 export const getCanteensByStatus = catchAsync(async (req, res, next) => {
-  const { startDate, startTime, endDate, endTime, duration } = req.query;
+  const { startDate, endDate, startTime, endTime, duration } = req.query;
+
+  // Validate required parameters
+  if (!startDate || !endDate || !startTime || !endTime || !duration) {
+    return next(
+      new AppError(
+        "Missing required query parameters: startDate, endDate, startTime, endTime, duration",
+        400
+      )
+    );
+  }
+
+  //
+
+  // res.status(200).json(result);
+});
+
+export const getCanteenByStatus = catchAsync(async (req, res, next) => {
+  const { startDate, endDate, startTime, endTime, duration } = req.query;
+  const { id } = req.params;
+
+  const canteen = await Canteen.findById(id);
+
+  if (!canteen) {
+    return next(new AppError("Canteen does not exist", 404));
+  }
+
+  const durationInt = Number(duration);
+
+  // generisati slot-ove za ovu canteen-u
+
+  // const slots = generateTimeSlots(
+  //   startDate,
+  //   startTime,
+  //   endDate,
+  //   endTime,
+  //   duration,
+  //   canteen.workingHours
+  // );
+
+  // Treba da vatim slot-ove koji postoje i njihov capacity za prosledjeni date i time i duration
+  // AKo mi posalji duration = 30 znaci vracam slot-ove koji traju pola sata
 });

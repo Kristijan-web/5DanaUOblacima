@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getCanteensByStatus = exports.deleteCanteen = exports.updateCanteen = exports.createCanteen = exports.getCanteen = exports.getCanteens = void 0;
+exports.getCanteenByStatus = exports.getCanteensByStatus = exports.deleteCanteen = exports.updateCanteen = exports.createCanteen = exports.getCanteen = exports.getCanteens = void 0;
 const CanteenModel_1 = __importDefault(require("../models/CanteenModel"));
 const appError_1 = __importDefault(require("../utills/appError"));
 const catchAsync_1 = __importDefault(require("../utills/catchAsync"));
@@ -53,5 +53,31 @@ exports.deleteCanteen = (0, catchAsync_1.default)(async (req, res, next) => {
     (0, sendResponse_1.default)(res, 204, deletedCanteen);
 });
 exports.getCanteensByStatus = (0, catchAsync_1.default)(async (req, res, next) => {
-    const { startDate, startTime, endDate, endTime, duration } = req.query;
+    const { startDate, endDate, startTime, endTime, duration } = req.query;
+    // Validate required parameters
+    if (!startDate || !endDate || !startTime || !endTime || !duration) {
+        return next(new appError_1.default("Missing required query parameters: startDate, endDate, startTime, endTime, duration", 400));
+    }
+    //
+    // res.status(200).json(result);
+});
+exports.getCanteenByStatus = (0, catchAsync_1.default)(async (req, res, next) => {
+    const { startDate, endDate, startTime, endTime, duration } = req.query;
+    const { id } = req.params;
+    const canteen = await CanteenModel_1.default.findById(id);
+    if (!canteen) {
+        return next(new appError_1.default("Canteen does not exist", 404));
+    }
+    const durationInt = Number(duration);
+    // generisati slot-ove za ovu canteen-u
+    // const slots = generateTimeSlots(
+    //   startDate,
+    //   startTime,
+    //   endDate,
+    //   endTime,
+    //   duration,
+    //   canteen.workingHours
+    // );
+    // Treba da vatim slot-ove koji postoje i njihov capacity za prosledjeni date i time i duration
+    // AKo mi posalji duration = 30 znaci vracam slot-ove koji traju pola sata
 });

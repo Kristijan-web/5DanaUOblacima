@@ -8,9 +8,9 @@ const canteenController_1 = require("../controllers/canteenController");
 const canteenRouter = express_1.default.Router();
 // protect, allowedTo("admin"),
 canteenRouter.get("/", canteenController_1.getCanteens);
+canteenRouter.get("/status", canteenController_1.getCanteensByStatus);
 canteenRouter.get("/:id", canteenController_1.getCanteen);
 canteenRouter.post("/", canteenController_1.createCanteen);
 canteenRouter.put("/:id", canteenController_1.updateCanteen);
 canteenRouter.delete("/:id", canteenController_1.deleteCanteen);
-canteenRouter.get("/status", canteenController_1.getCanteensByStatus);
 exports.default = canteenRouter;
