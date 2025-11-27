@@ -1,20 +1,20 @@
 # 5DanaUOblacima
 
-Sistem za upravljanje rezervacijama u kantinama sa mogućnostima pregleda dostupnosti i zakazivanja obroka.
+A canteen reservation management system with availability preview and meal booking capabilities.
 
-## Korišćene tehnologije i verzije
+## Techonogies and versions
 
-| Tehnologija           | Verzija             |
-| --------------------- | ------------------- |
-| Node.js               | 22                  |
-| TypeScript            | 5.9.3               |
-| Express               | 5.1.0               |
-| Mongoose              | 9.0.0               |
-| MongoDB               | 7.0+                |
-| JSONWebToken          | 9.0.2               |
-| Dotenv                | 17.2.3              |
-| Nodemon               | (dev dependency)    |
-| MongoDB Memory Server | 10.3.0 (za testove) |
+| Technology            | Verzion |
+| --------------------- | ------- |
+| Node.js               | 22      |
+| TypeScript            | 5.9.3   |
+| Express               | 5.1.0   |
+| Mongoose              | 9.0.0   |
+| MongoDB               | 7.0+    |
+| JSONWebToken          | 9.0.2   |
+| Dotenv                | 17.2.3  |
+| Nodemon               | 3.1.11  |
+| MongoDB Memory Server | 10.3.0  |
 
 Setup Build Environment
 
@@ -26,128 +26,25 @@ Setup Build Environment
 
 Run Applicaton
 
-- Run command npm run build
+- Run command: npm run build
 
-## Podešavanje okruženja
-
-### Preduslovi
-
-- **Node.js** verzija 22 ili novija
-- **npm** ili **yarn** package manager
-- **MongoDB** - lokalna instalacija ili MongoDB Atlas konekcija
-
-### Instalacija zavisnosti
-
-1. Klonirajte repozitorijum:
-
-```bash
-git clone https://github.com/Kristijan-web/5DanaUOblacima.git
-cd 5DanaUOblacima
-```
-
- Instrukcije za pokretanje aplikacije
-
-// da ima instaliran node
-/ na kom portu itd..
-
-```bash
-npm install
-```
-
-3. Kreirajte `.env` fajl u root direktorijumu sa sledećim varijablama:
-
-```env
-PORT=3000
-MONGODB_URI=mongodb://localhost:27017/hackathon-levi9
-NODE_ENV=development
-JWT_SECRET=your-secret-key-here
-JWT_EXPIRES_IN=7d
-```
-
-## Pokretanje build-a
-
-Aplikacija je napisana u TypeScript-u i mora biti kompajlirana u JavaScript pre nego što se pokrene.
-
-### Development build (sa watch modom)
-
-```bash
-npm run build
-```
-
-Ova komanda će:
-
-1. Kompajlirati TypeScript fajlove u `dist` direktorijum
-2. Pokrenuti Nodemon koji će automatski restartovati server pri svakoj promeni koda
-
-### Production build
-
-```bash
-npx tsc
-```
-
-Ovo će samo kompajlirati TypeScript u JavaScript bez pokretanja aplikacije.
-
-## Pokretanje aplikacije
-
-### U development modu
-
-```bash
-npm run build
-```
-
-Server će biti dostupan na `http://localhost:3000`
-
-### U production modu
-
-```bash
-npx tsc
-node dist/server.js
-```
-
-## Pokretanje unit testova
-
-Konfiguracija za testove je dostupna, ali test skripte nisu još u potpunosti implementirane.
-
-Za pokretanje testova (kada budu dostupni):
-
-```bash
-npm test
-```
-
-### Postavljanje testova
-
-Projekat koristi **MongoDB Memory Server** za testove kako bi se izbegla potreba za lokalnom MongoDB bazom tokom testiranja.
-
-Zavisnosti za testiranje su već instalirane:
-
-- `mongodb-memory-server@10.3.0` - In-memory MongoDB instanca
-- `@types/node` - TypeScript tipovi za Node.js
-
-Kada budu implementirani testovi, oni će se pokrenuti sa:
-
-```bash
-npm test
-```
-
-## Struktura projekta
+## File structure
 
 ```
-├── app.ts                 # Glavna aplikacija
+├── app.ts                 # Main application file
 ├── server.ts              # Server setup
-├── controllers/           # Kontroleri za rutama
-├── models/                # Mongoose modeli
-├── routes/                # Express rutere
-├── utills/                # Pomoćne funkcije
-├── dist/                  # Kompajlirani JavaScript (generisan)
-├── package.json           # Zavisnosti i skripte
-├── tsconfig.json          # TypeScript konfiguracija
-└── README.md              # Ovaj fajl
+├── controllers/           # Route controllers
+├── models/                # Mongoose models
+├── routes/                # Express routers
+├── utils/                 # Helper functions
+├── dist/                  # Compiled JavaScript (generated)
+├── package.json           # Dependencies and scripts
+├── tsconfig.json          # TypeScript configuration
+└── README.md              # Project documentation
 ```
 
-## API Endpoints
+## API Endpoints RESTFul
 
-- **Canteens**: `/canteens` - Upravljanje kantinama i pregled dostupnih slotova
-- **Reservations**: `/reservations` - Upravljanje rezervacijama
-- **Students**: `/students` - Upravljanje studentima
-
-ISC
+- **Canteens**: `/canteens` - Management of canteens and viewing available slots
+- **Reservations**: `/reservations` - Reservation management
+- **Students**: `/students` - Student management

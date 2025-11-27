@@ -12,7 +12,6 @@ import { allowedTo, protect } from "../controllers/authController";
 const canteenRouter = express.Router();
 // protect, allowedTo("admin"),
 canteenRouter.get("/", getCanteens);
-canteenRouter.get("/status", getCanteensByStatus);
 canteenRouter.get("/:id", getCanteen);
 canteenRouter.post("/", createCanteen);
 canteenRouter.put("/:id", updateCanteen);
