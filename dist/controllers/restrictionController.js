@@ -13,6 +13,7 @@ exports.createRestriction = (0, catchAsync_1.default)(async (req, res, next) => 
     const { id: canteenId } = req.params;
     const restriction = await restrictionModel_1.default.create(req.body);
     if (!restriction) {
+        ``;
         return next(new appError_1.default("Failed to create restriction", 400));
     }
     (0, snsMail_1.sendCancellationNotification)({

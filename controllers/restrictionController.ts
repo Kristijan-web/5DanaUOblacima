@@ -11,6 +11,7 @@ export const createRestriction = catchAsync(async (req, res, next) => {
 
   const restriction = await Restriction.create(req.body as RestrictionType);
   if (!restriction) {
+    ``;
     return next(new AppError("Failed to create restriction", 400));
   }
 
