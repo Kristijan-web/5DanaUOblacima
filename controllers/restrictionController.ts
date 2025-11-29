@@ -11,8 +11,8 @@ export const createRestriction = catchAsync(async (req, res, next) => {
   if (!restriction) {
     return next(new AppError("Failed to create restriction", 400));
   }
-  const restrtictionStartDate = restriction?.startDate;
-  const restrictionEndDate = restriction?.endDate;
+  // const restrtictionStartDate = restriction?.startDate;
+  // const restrictionEndDate = restriction?.endDate;
 
   const reservatiosn = await Reservation.find({ canteen: canteenId });
 
