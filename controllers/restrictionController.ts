@@ -5,6 +5,7 @@ import Restriction, { RestrictionType } from "../models/restrictionModel";
 import AppError from "../utills/appError";
 import catchAsync from "../utills/catchAsync";
 import { sendCancellationNotification } from "../utills/snsMail";
+import sendResponse from "../utills/sendResponse";
 
 export const createRestriction = catchAsync(async (req, res, next) => {
   const { id: canteenId } = req.params;
@@ -30,3 +31,13 @@ export const createRestriction = catchAsync(async (req, res, next) => {
 });
 
 //
+
+export const testRestriction = catchAsync(async (req, res, next) => {
+  const restriction = await Restriction.create(req.body as RestrictionType);
+  sendCancellationNotification({
+    studentEmail: "krimster8@gmail.com",
+    canteenName: "testt",
+    reservationTime: "20",
+  });
+  sendResponse(res, 200, restriction);
+});

@@ -3,12 +3,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createRestriction = void 0;
+exports.testRestriction = exports.createRestriction = void 0;
 const reservationModel_1 = __importDefault(require("../models/reservationModel"));
 const restrictionModel_1 = __importDefault(require("../models/restrictionModel"));
 const appError_1 = __importDefault(require("../utills/appError"));
 const catchAsync_1 = __importDefault(require("../utills/catchAsync"));
 const snsMail_1 = require("../utills/snsMail");
+const sendResponse_1 = __importDefault(require("../utills/sendResponse"));
 exports.createRestriction = (0, catchAsync_1.default)(async (req, res, next) => {
     const { id: canteenId } = req.params;
     const restriction = await restrictionModel_1.default.create(req.body);
@@ -28,3 +29,12 @@ exports.createRestriction = (0, catchAsync_1.default)(async (req, res, next) => 
     const invalidReservatiosn = reservations.map((reservation) => { });
 });
 //
+exports.testRestriction = (0, catchAsync_1.default)(async (req, res, next) => {
+    const restriction = await restrictionModel_1.default.create(req.body);
+    (0, snsMail_1.sendCancellationNotification)({
+        studentEmail: "krimster8@gmail.com",
+        canteenName: "testt",
+        reservationTime: "20",
+    });
+    (0, sendResponse_1.default)(res, 200, restriction);
+});

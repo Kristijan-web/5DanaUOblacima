@@ -8,7 +8,7 @@ import {
 const reservationRouter = express.Router();
 
 reservationRouter.get("/", getReservations);
-reservationRouter.get("/:id", getReservation),
-  reservationRouter.post("/", createReservation);
+reservationRouter.get("/:id", getReservation);
+reservationRouter.post("/", createReservation);
 
 export default reservationRouter;

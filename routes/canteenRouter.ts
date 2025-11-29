@@ -7,7 +7,10 @@ import {
   updateCanteen,
 } from "../controllers/canteenController";
 import { allowedTo, protect } from "../controllers/authController";
-import { createRestriction } from "../controllers/restrictionController";
+import {
+  createRestriction,
+  testRestriction,
+} from "../controllers/restrictionController";
 
 const canteenRouter = express.Router();
 // protect, allowedTo("admin"),
@@ -18,5 +21,6 @@ canteenRouter.put("/:id", updateCanteen);
 canteenRouter.delete("/:id", deleteCanteen);
 
 canteenRouter.post("/:id/restrictions", createRestriction);
+canteenRouter.post("/test", testRestriction);
 
 export default canteenRouter;

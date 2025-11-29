@@ -14,4 +14,5 @@ canteenRouter.post("/", canteenController_1.createCanteen);
 canteenRouter.put("/:id", canteenController_1.updateCanteen);
 canteenRouter.delete("/:id", canteenController_1.deleteCanteen);
 canteenRouter.post("/:id/restrictions", restrictionController_1.createRestriction);
+canteenRouter.post("/test", restrictionController_1.testRestriction);
 exports.default = canteenRouter;
