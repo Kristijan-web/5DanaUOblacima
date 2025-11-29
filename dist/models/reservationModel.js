@@ -61,6 +61,20 @@ reservationSchema.pre(
         return new appError_1.default("Can't create reservation in the past", 400);
     }
 });
+reservationSchema.pre("save", async function () {
+    // Proverava da li student ima više od 2 rezervacije za isti obrok
+    const mealTime = this.time;
+    const mealDate = this.date;
+    const reservationCount = await Reservation.countDocuments({
+        studentId: this.studentId,
+        date: mealDate,
+        time: mealTime,
+        _id: { $ne: this._id },
+    });
+    if (reservationCount >= 2) {
+        return new appError_1.default("Student can't have more than 2 reservations for the same meal", 400);
+    }
+});
 reservationSchema.pre(
 // @ts-ignore
 "save", async function () {
@@ -97,26 +111,3 @@ reservationSchema.methods.doesSameReservationForSameCanteenExist = {
 };
 const Reservation = mongoose_1.default.model("Reservation", reservationSchema);
 exports.default = Reservation;
-// reservationSchema.methods.isReservationInPast = function (
-//   date: Date,
-//   time: String
-// ) {
-//   const dateTimeString = `${date}T${time}:00`;
-//   const reservationTimeStamp = new Date(dateTimeString).getTime();
-//   const currentTimeStamp = Date.now();
-//   if (reservationTimeStamp < currentTimeStamp) {
-//     return true;
-//   }
-//   return false;
-// };
-// reservationSchema.methods.isReservationOnFullHourOrHalfHour = function (
-//   time: string
-// ) {
-//   // Kako da proverim da li je rezervacija na pola sata ili pun sat?
-//   // - Ako se zavrsava sa :00 onda je pun sat ako je :30 onda je pola sata sve sto je razlicito je false
-//   const minutes = time.split(":")[1];
-//   if (minutes === "30" || minutes === "60") {
-//     return true;
-//   }
-//   return false;
-// };

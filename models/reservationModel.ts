@@ -6,6 +6,7 @@ import mongoose, {
 } from "mongoose";
 import AppError from "../utills/appError";
 import Canteen from "./CanteenModel";
+import Student from "./studentModel";
 
 // interface IreservationMethods {
 //   isReservationInPast: (date: Date, time: string) => boolean;
@@ -38,7 +39,7 @@ const reservationSchema = new mongoose.Schema(
       type: Number,
       required: [true, "Duration is required"],
     },
-  status: {
+    status: {
       type: String,
       enum: ["Active", "Cancelled", "Completed"],
       default: "Active",
@@ -70,6 +71,29 @@ reservationSchema.pre(
 
     if (reservationTimeStamp < currentTimeStamp) {
       return new AppError("Can't create reservation in the past", 400);
+    }
+  }
+);
+
+reservationSchema.pre(
+  "save",
+  async function (this: HydratedDocument<ReservationType>) {
+    // Proverava da li student ima više od 2 rezervacije za isti obrok
+    const mealTime = this.time;
+    const mealDate = this.date;
+
+    const reservationCount = await Reservation.countDocuments({
+      studentId: this.studentId,
+      date: mealDate,
+      time: mealTime,
+      _id: { $ne: this._id },
+    });
+
+    if (reservationCount >= 2) {
+      return new AppError(
+        "Student can't have more than 2 reservations for the same meal",
+        400
+      );
     }
   }
 );
@@ -138,30 +162,3 @@ const Reservation = mongoose.model<ReservationType>(
 );
 
 export default Reservation;
-
-// reservationSchema.methods.isReservationInPast = function (
-//   date: Date,
-//   time: String
-// ) {
-//   const dateTimeString = `${date}T${time}:00`;
-
-//   const reservationTimeStamp = new Date(dateTimeString).getTime();
-//   const currentTimeStamp = Date.now();
-
-//   if (reservationTimeStamp < currentTimeStamp) {
-//     return true;
-//   }
-//   return false;
-// };
-
-// reservationSchema.methods.isReservationOnFullHourOrHalfHour = function (
-//   time: string
-// ) {
-//   // Kako da proverim da li je rezervacija na pola sata ili pun sat?
-//   // - Ako se zavrsava sa :00 onda je pun sat ako je :30 onda je pola sata sve sto je razlicito je false
-//   const minutes = time.split(":")[1];
-//   if (minutes === "30" || minutes === "60") {
-//     return true;
-//   }
-//   return false;
-// };
