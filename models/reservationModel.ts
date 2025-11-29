@@ -38,6 +38,11 @@ const reservationSchema = new mongoose.Schema(
       type: Number,
       required: [true, "Duration is required"],
     },
+  status: {
+      type: String,
+      enum: ["Active", "Cancelled", "Completed"],
+      default: "Active",
+    },
   },
   {
     toJSON: {

@@ -1,3 +1,4 @@
+import Canteen from "../models/CanteenModel";
 import Reservation from "../models/reservationModel";
 import AppError from "../utills/appError";
 import catchAsync from "../utills/catchAsync";
@@ -21,27 +22,85 @@ export const getReservation = catchAsync(async (req, res, next) => {
 });
 
 export const createReservation = catchAsync(async (req, res, next) => {
-  // ovde da pozovem find
-  // Sta zelim?
-  // - Da proverim da li postoji vec rezervacija u iste vreme u istoj menzi
-  // - Ne sme da se napravi novi zapis ako vec postoji
+  const { studentId, canteenId, date, time, duration } = req.body;
 
-  // Sta je problem?
-  // Ne znam gde da pisem logiku za tu proveru, dal u document middleware-u, dal u query middleware-u ili ovde u controller-u?
+  // Parse the date to midnight UTC for consistent comparison
+  const reservationDate = new Date(date);
 
-  // Zasto ne document middleware?
-  // - On sadrzi podatke spremne za slanje bazi mogu tu da uzmem id da uradim find
+  const canteen = await Canteen.findById(canteenId);
+  if (!canteen) {
+    return next(new AppError("Canteen not found", 404));
+  }
+   
+   // Helper function to convert time string to minutes
+  const timeToMinutes = (timeStr: string): number => {
+    const [hours, minutes] = timeStr.split(":").map(Number);
+    return hours * 60 + minutes;
+  };
+
+  const reservationStartMinutes = timeToMinutes(time);
+  const reservationEndMinutes = reservationStartMinutes + duration;
+
+  // Find the meal type that matches the reservation time
+  const matchingMeal = canteen.workingHours.find((wh: any) => {
+    const mealStartMinutes = timeToMinutes(wh.from);
+    const mealEndMinutes = timeToMinutes(wh.to);
+    
+    // Check if both start and end time are within this meal's working hours
+    return (
+      reservationStartMinutes >= mealStartMinutes &&
+      reservationEndMinutes <= mealEndMinutes
+    );
+  });
+
+  if (!matchingMeal) {
+    return next(
+      new AppError(
+        "Reservation time must be within canteen working hours for a meal type",
+        400
+      )
+    );
+  }
+
+  const mealType = matchingMeal.meal;
+
+  // Check if student already has a reservation at the same canteen, date, and time
+  const existingReservation = await Reservation.findOne({
+    studentId,
+    canteenId,
+    date: reservationDate,
+    time,
+  });
+
+
+  if (existingReservation) {
+    return next(
+      new AppError(
+        "You already have a reservation at this canteen for this time slot",
+        400
+      )
+    );
+  }
 
   const reservation = await Reservation.create({
-    studentId: req.body.studentId,
-    canteenId: req.body.canteenId,
-    date: req.body.date,
-    time: req.body.time,
-    duration: req.body.duration,
+    studentId,
+    canteenId,
+    date: reservationDate,
+    time,
+    duration,
   });
 
   if (!reservation)
     return next(new AppError("Failed to create reservation", 400));
 
-  sendResponse(res, 201, reservation);
+  const reservationDTO = {
+    id: reservation._id,
+    studentId: reservation.studentId,
+    canteenId: reservation.canteenId,
+    date: reservation.date.toISOString().split("T")[0],
+    time: reservation.time,
+    duration: reservation.duration,
+    status: reservation.status,
+  }
+  sendResponse(res, 201, reservationDTO as any);
 });

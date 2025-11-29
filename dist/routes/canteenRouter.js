@@ -9,6 +9,8 @@ const restrictionController_1 = require("../controllers/restrictionController");
 const canteenRouter = express_1.default.Router();
 // protect, allowedTo("admin"),
 canteenRouter.get("/", canteenController_1.getCanteens);
+canteenRouter.get("/status", canteenController_1.getCanteensByStatus);
+canteenRouter.get("/:id/status", canteenController_1.getCanteenByStatus);
 canteenRouter.get("/:id", canteenController_1.getCanteen);
 canteenRouter.post("/", canteenController_1.createCanteen);
 canteenRouter.put("/:id", canteenController_1.updateCanteen);
