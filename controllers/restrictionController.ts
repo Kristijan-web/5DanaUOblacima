@@ -27,7 +27,11 @@ export const createRestriction = catchAsync(async (req, res, next) => {
   const reservations = await Reservation.find({ canteen: canteenId });
 
   // Treba proci kroz sve rezervacije i vratiti one koje ne ispunjavaju uslov restrikcije
-  const invalidReservatiosn = reservations.map((reservation) => {});
+  const invalidReservatiosn = reservations.map((reservation) => {
+    const reservationDateTimeString = `${reservation.date}T${reservation.time}:00`;
+    const reservationDate = new Date(reservationDateTimeString).getTime();
+  });
+  //
 });
 
 //

@@ -26,7 +26,11 @@ exports.createRestriction = (0, catchAsync_1.default)(async (req, res, next) => 
     const restrictionEndDate = restriction.endDate;
     const reservations = await reservationModel_1.default.find({ canteen: canteenId });
     // Treba proci kroz sve rezervacije i vratiti one koje ne ispunjavaju uslov restrikcije
-    const invalidReservatiosn = reservations.map((reservation) => { });
+    const invalidReservatiosn = reservations.map((reservation) => {
+        const reservationDateTimeString = `${reservation.date}T${reservation.time}:00`;
+        const reservationDate = new Date(reservationDateTimeString).getTime();
+    });
+    //
 });
 //
 exports.testRestriction = (0, catchAsync_1.default)(async (req, res, next) => {
