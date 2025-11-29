@@ -5,6 +5,7 @@ import {
   getCanteen,
   getCanteenByStatus,
   getCanteens,
+  getCanteensByStatus,
   updateCanteen,
 } from "../controllers/canteenController";
 import { allowedTo, protect } from "../controllers/authController";
