@@ -40,6 +40,10 @@ function sendProduction(error: AppError | Error, res: Response) {
   }
 }
 
+function handleEmail() {
+  return new AppError("Email already exists", 400);
+}
+
 const globalErrorMiddleware = function (
   error: AppError | Error | MongoServerError | mongoose.Error,
   req: Request,
@@ -53,7 +57,7 @@ const globalErrorMiddleware = function (
     let err = error;
 
     if ("code" in err && err.code === 11000) {
-      return next(new AppError("Email already exists", 400));
+      err = handleEmail();
     }
     if (err.name === "CastError") {
       err = handleInvalidId();
