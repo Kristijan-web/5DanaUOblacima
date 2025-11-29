@@ -1,29 +1,31 @@
+import { HydratedDocument } from "mongoose";
 import Canteen from "../models/CanteenModel";
 import Reservation from "../models/reservationModel";
-import Restriction, { RestrictionType } from "../models/Restriction";
+import Restriction, { RestrictionType } from "../models/restrictionModel";
 import AppError from "../utills/appError";
 import catchAsync from "../utills/catchAsync";
+import { sendCancellationNotification } from "../utills/snsMail";
 
 export const createRestriction = catchAsync(async (req, res, next) => {
   const { id: canteenId } = req.params;
 
-  const restriction = await Restriction.create(req.body);
+  const restriction = await Restriction.create(req.body as RestrictionType);
   if (!restriction) {
     return next(new AppError("Failed to create restriction", 400));
   }
-  // const restrtictionStartDate = restriction?.startDate;
-  // const restrictionEndDate = restriction?.endDate;
 
-  const reservatiosn = await Reservation.find({ canteen: canteenId });
+  sendCancellationNotification({
+    studentEmail: "krimster8@gmail.com",
+    canteenName: "testt",
+    reservationTime: "20",
+  });
 
-  // kada treba izvrsiti loguiku
-  // - Nakon pravljenje restriction
+  const restrictionStartDate = restriction.startDate;
+  const restrictionEndDate = restriction.endDate;
+  const reservations = await Reservation.find({ canteen: canteenId });
 
-  //   const canteen = await Canteen.findById(canteenId);
-
-  // Pravljenje restriction logike
-  // - Napravi se nova restrikcija to mora
-
-  // Sta se desava nakon sto se napravi nova restrikcija
-  // Ulazi se u reservations i prolazi kroz sve rezervacije i brisu se one koje su u konfliktu sa restriction
+  // Treba proci kroz sve rezervacije i vratiti one koje ne ispunjavaju uslov restrikcije
+  const invalidReservatiosn = reservations.map((reservation) => {});
 });
+
+//

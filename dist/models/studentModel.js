@@ -19,6 +19,10 @@ const studentSchema = new mongoose_1.default.Schema({
         type: Boolean,
         default: true,
     },
+    indexNumber: {
+        type: String,
+        trim: true,
+    }
 }, {
     toJSON: {
         virtuals: true,

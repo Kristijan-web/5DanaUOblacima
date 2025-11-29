@@ -23,5 +23,4 @@ const Restriction = mongoose.model<RestrictionType>(
   "Restriction",
   restrictionSchema
 );
-
 export default Restriction;
