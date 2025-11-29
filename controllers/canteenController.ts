@@ -90,18 +90,12 @@ export const getCanteenByStatus = catchAsync(async (req, res, next) => {
   }
 
   const durationInt = Number(duration);
-
-  // generisati slot-ove za ovu canteen-u
-
-  // const slots = generateTimeSlots(
-  //   startDate,
-  //   startTime,
-  //   endDate,
-  //   endTime,
-  //   duration,
-  //   canteen.workingHours
-  // );
-
-  // Treba da vatim slot-ove koji postoje i njihov capacity za prosledjeni date i time i duration
-  // AKo mi posalji duration = 30 znaci vracam slot-ove koji traju pola sata
 });
+
+//
+
+// Imacu posebnu tabelu restrikcije
+// Ili da embedujem restrikcije u menze
+
+// Ako bih embedovao u canteens
+// Onda kada se napravi restrikcija izvrsi se kod koji prolazi kroz rezervacije i proverava vremena i datume svih rezervacija da li postoji ona iz restriction

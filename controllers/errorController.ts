@@ -52,6 +52,9 @@ const globalErrorMiddleware = function (
   } else {
     let err = error;
 
+    if ("code" in err && err.code === 11000) {
+      return next(new AppError("Email already exists", 400));
+    }
     if (err.name === "CastError") {
       err = handleInvalidId();
     }
