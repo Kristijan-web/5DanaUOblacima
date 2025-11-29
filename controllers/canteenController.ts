@@ -1,6 +1,8 @@
 import Canteen from "../models/CanteenModel";
+import Reservation from "../models/reservationModel";
 import AppError from "../utills/appError";
 import catchAsync from "../utills/catchAsync";
+import generateTimeSlots from "../utills/generateTimeSlots";
 import sendResponse from "../utills/sendResponse";
 
 export const getCanteens = catchAsync(async (req, res, next) => {
@@ -74,14 +76,81 @@ export const getCanteensByStatus = catchAsync(async (req, res, next) => {
     );
   }
 
-  //
+  const durationInt = Number(duration);
 
-  // res.status(200).json(result);
+  // Validate duration is 30 or 60
+  if (durationInt !== 30 && durationInt !== 60) {
+    return next(new AppError("Duration must be 30 or 60 minutes", 400));
+  }
+
+  // Get all canteens
+  const canteens = await Canteen.find();
+
+  // Process each canteen
+  const result = await Promise.all(
+    canteens.map(async (canteen) => {
+      // Generate time slots based on query parameters and canteen's working hours
+      const timeSlots = generateTimeSlots(
+        startDate as string,
+        endDate as string,
+        startTime as string,
+        endTime as string,
+        durationInt,
+        canteen.workingHours
+      );
+
+      // For each slot, count existing reservations and calculate remaining capacity
+      const slotsWithCapacity = await Promise.all(
+        timeSlots.map(async (slot) => {
+          // Parse the date string to a Date object for DB query (midnight UTC)
+          const slotDate = new Date(slot.date + "T00:00:00Z");
+
+          // Count reservations for this canteen, date, and time
+          const reservationCount = await Reservation.countDocuments({
+            canteenId: canteen._id,
+            date: slotDate,
+            time: slot.time,
+          });
+
+          return {
+            date: slot.date,
+            meal: slot.meal,
+            startTime: slot.time,
+            remainingCapacity: canteen.capacity - reservationCount,
+          };
+        })
+      );
+
+      return {
+        canteenId: canteen._id,
+        slots: slotsWithCapacity,
+      };
+    })
+  );
+
+  res.status(200).json(result);
 });
 
 export const getCanteenByStatus = catchAsync(async (req, res, next) => {
   const { startDate, endDate, startTime, endTime, duration } = req.query;
   const { id } = req.params;
+
+  // Validate required parameters
+  if (!startDate || !endDate || !startTime || !endTime || !duration) {
+    return next(
+      new AppError(
+        "Missing required query parameters: startDate, endDate, startTime, endTime, duration",
+        400
+      )
+    );
+  }
+
+  const durationInt = Number(duration);
+
+  // Validate duration is 30 or 60
+  if (durationInt !== 30 && durationInt !== 60) {
+    return next(new AppError("Duration must be 30 or 60 minutes", 400));
+  }
 
   const canteen = await Canteen.findById(id);
 
@@ -89,19 +158,43 @@ export const getCanteenByStatus = catchAsync(async (req, res, next) => {
     return next(new AppError("Canteen does not exist", 404));
   }
 
-  const durationInt = Number(duration);
+  // Generate time slots based on query parameters and canteen's working hours
+  const timeSlots = generateTimeSlots(
+    startDate as string,
+    endDate as string,
+    startTime as string,
+    endTime as string,
+    durationInt,
+    canteen.workingHours
+  );
 
-  // generisati slot-ove za ovu canteen-u
+  // For each slot, count existing reservations and calculate remaining capacity
+  const slotsWithCapacity = await Promise.all(
+    timeSlots.map(async (slot) => {
+      // Parse the date string to a Date object for DB query (midnight UTC)
+      const slotDate = new Date(slot.date + "T00:00:00Z");
 
-  // const slots = generateTimeSlots(
-  //   startDate,
-  //   startTime,
-  //   endDate,
-  //   endTime,
-  //   duration,
-  //   canteen.workingHours
-  // );
+      // Count reservations for this canteen, date, and time
+      const reservationCount = await Reservation.countDocuments({
+        canteenId: id,
+        date: slotDate,
+        time: slot.time,
+      });
 
-  // Treba da vatim slot-ove koji postoje i njihov capacity za prosledjeni date i time i duration
-  // AKo mi posalji duration = 30 znaci vracam slot-ove koji traju pola sata
+      return {
+        date: slot.date,
+        meal: slot.meal,
+        startTime: slot.time,
+        remainingCapacity: canteen.capacity - reservationCount,
+      };
+    })
+  );
+
+  // Build response
+  const response = {
+    canteenId: id,
+    slots: slotsWithCapacity,
+  };
+
+  res.status(200).json(response);
 });

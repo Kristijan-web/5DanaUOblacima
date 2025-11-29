@@ -5,8 +5,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getCanteenByStatus = exports.getCanteensByStatus = exports.deleteCanteen = exports.updateCanteen = exports.createCanteen = exports.getCanteen = exports.getCanteens = void 0;
 const CanteenModel_1 = __importDefault(require("../models/CanteenModel"));
+const reservationModel_1 = __importDefault(require("../models/reservationModel"));
 const appError_1 = __importDefault(require("../utills/appError"));
 const catchAsync_1 = __importDefault(require("../utills/catchAsync"));
+const generateTimeSlots_1 = __importDefault(require("../utills/generateTimeSlots"));
 const sendResponse_1 = __importDefault(require("../utills/sendResponse"));
 exports.getCanteens = (0, catchAsync_1.default)(async (req, res, next) => {
     const canteens = await CanteenModel_1.default.find();
@@ -58,26 +60,80 @@ exports.getCanteensByStatus = (0, catchAsync_1.default)(async (req, res, next) =
     if (!startDate || !endDate || !startTime || !endTime || !duration) {
         return next(new appError_1.default("Missing required query parameters: startDate, endDate, startTime, endTime, duration", 400));
     }
-    //
-    // res.status(200).json(result);
+    const durationInt = Number(duration);
+    // Validate duration is 30 or 60
+    if (durationInt !== 30 && durationInt !== 60) {
+        return next(new appError_1.default("Duration must be 30 or 60 minutes", 400));
+    }
+    // Get all canteens
+    const canteens = await CanteenModel_1.default.find();
+    // Process each canteen
+    const result = await Promise.all(canteens.map(async (canteen) => {
+        // Generate time slots based on query parameters and canteen's working hours
+        const timeSlots = (0, generateTimeSlots_1.default)(startDate, endDate, startTime, endTime, durationInt, canteen.workingHours);
+        // For each slot, count existing reservations and calculate remaining capacity
+        const slotsWithCapacity = await Promise.all(timeSlots.map(async (slot) => {
+            // Parse the date string to a Date object for DB query (midnight UTC)
+            const slotDate = new Date(slot.date + "T00:00:00Z");
+            // Count reservations for this canteen, date, and time
+            const reservationCount = await reservationModel_1.default.countDocuments({
+                canteenId: canteen._id,
+                date: slotDate,
+                time: slot.time,
+            });
+            return {
+                date: slot.date,
+                meal: slot.meal,
+                startTime: slot.time,
+                remainingCapacity: canteen.capacity - reservationCount,
+            };
+        }));
+        return {
+            canteenId: canteen._id,
+            slots: slotsWithCapacity,
+        };
+    }));
+    res.status(200).json(result);
 });
 exports.getCanteenByStatus = (0, catchAsync_1.default)(async (req, res, next) => {
     const { startDate, endDate, startTime, endTime, duration } = req.query;
     const { id } = req.params;
+    // Validate required parameters
+    if (!startDate || !endDate || !startTime || !endTime || !duration) {
+        return next(new appError_1.default("Missing required query parameters: startDate, endDate, startTime, endTime, duration", 400));
+    }
+    const durationInt = Number(duration);
+    // Validate duration is 30 or 60
+    if (durationInt !== 30 && durationInt !== 60) {
+        return next(new appError_1.default("Duration must be 30 or 60 minutes", 400));
+    }
     const canteen = await CanteenModel_1.default.findById(id);
     if (!canteen) {
         return next(new appError_1.default("Canteen does not exist", 404));
     }
-    const durationInt = Number(duration);
-    // generisati slot-ove za ovu canteen-u
-    // const slots = generateTimeSlots(
-    //   startDate,
-    //   startTime,
-    //   endDate,
-    //   endTime,
-    //   duration,
-    //   canteen.workingHours
-    // );
-    // Treba da vatim slot-ove koji postoje i njihov capacity za prosledjeni date i time i duration
-    // AKo mi posalji duration = 30 znaci vracam slot-ove koji traju pola sata
+    // Generate time slots based on query parameters and canteen's working hours
+    const timeSlots = (0, generateTimeSlots_1.default)(startDate, endDate, startTime, endTime, durationInt, canteen.workingHours);
+    // For each slot, count existing reservations and calculate remaining capacity
+    const slotsWithCapacity = await Promise.all(timeSlots.map(async (slot) => {
+        // Parse the date string to a Date object for DB query (midnight UTC)
+        const slotDate = new Date(slot.date + "T00:00:00Z");
+        // Count reservations for this canteen, date, and time
+        const reservationCount = await reservationModel_1.default.countDocuments({
+            canteenId: id,
+            date: slotDate,
+            time: slot.time,
+        });
+        return {
+            date: slot.date,
+            meal: slot.meal,
+            startTime: slot.time,
+            remainingCapacity: canteen.capacity - reservationCount,
+        };
+    }));
+    // Build response
+    const response = {
+        canteenId: id,
+        slots: slotsWithCapacity,
+    };
+    res.status(200).json(response);
 });

@@ -3,6 +3,7 @@ import {
   createCanteen,
   deleteCanteen,
   getCanteen,
+  getCanteenByStatus,
   getCanteens,
   getCanteensByStatus,
   updateCanteen,
@@ -12,6 +13,8 @@ import { allowedTo, protect } from "../controllers/authController";
 const canteenRouter = express.Router();
 // protect, allowedTo("admin"),
 canteenRouter.get("/", getCanteens);
+canteenRouter.get("/status", getCanteensByStatus);
+canteenRouter.get("/:id/status", getCanteenByStatus);
 canteenRouter.get("/:id", getCanteen);
 canteenRouter.post("/", createCanteen);
 canteenRouter.put("/:id", updateCanteen);
