@@ -37,6 +37,9 @@ function sendProduction(error, res) {
         });
     }
 }
+function handleEmail() {
+    return new appError_1.default("Email already exists", 400);
+}
 const globalErrorMiddleware = function (error, req, res, next) {
     console.log("evo greske", error);
     if (process.env.NODE_ENV === "development") {
@@ -44,6 +47,9 @@ const globalErrorMiddleware = function (error, req, res, next) {
     }
     else {
         let err = error;
+        if ("code" in err && err.code === 11000) {
+            err = handleEmail();
+        }
         if (err.name === "CastError") {
             err = handleInvalidId();
         }

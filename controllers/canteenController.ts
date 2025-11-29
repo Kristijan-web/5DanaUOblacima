@@ -146,6 +146,7 @@ export const getCanteenByStatus = catchAsync(async (req, res, next) => {
   }
 
   const durationInt = Number(duration);
+});
 
   // Validate duration is 30 or 60
   if (durationInt !== 30 && durationInt !== 60) {

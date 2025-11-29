@@ -137,3 +137,8 @@ exports.getCanteenByStatus = (0, catchAsync_1.default)(async (req, res, next) =>
     };
     res.status(200).json(response);
 });
+//
+// Imacu posebnu tabelu restrikcije
+// Ili da embedujem restrikcije u menze
+// Ako bih embedovao u canteens
+// Onda kada se napravi restrikcija izvrsi se kod koji prolazi kroz rezervacije i proverava vremena i datume svih rezervacija da li postoji ona iz restriction
