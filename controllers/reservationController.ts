@@ -31,8 +31,8 @@ export const createReservation = catchAsync(async (req, res, next) => {
   if (!canteen) {
     return next(new AppError("Canteen not found", 404));
   }
-   
-   // Helper function to convert time string to minutes
+
+  // Helper function to convert time string to minutes
   const timeToMinutes = (timeStr: string): number => {
     const [hours, minutes] = timeStr.split(":").map(Number);
     return hours * 60 + minutes;
@@ -45,7 +45,7 @@ export const createReservation = catchAsync(async (req, res, next) => {
   const matchingMeal = canteen.workingHours.find((wh: any) => {
     const mealStartMinutes = timeToMinutes(wh.from);
     const mealEndMinutes = timeToMinutes(wh.to);
-    
+
     // Check if both start and end time are within this meal's working hours
     return (
       reservationStartMinutes >= mealStartMinutes &&
@@ -71,7 +71,6 @@ export const createReservation = catchAsync(async (req, res, next) => {
     date: reservationDate,
     time,
   });
-
 
   if (existingReservation) {
     return next(
@@ -101,6 +100,6 @@ export const createReservation = catchAsync(async (req, res, next) => {
     time: reservation.time,
     duration: reservation.duration,
     status: reservation.status,
-  }
+  };
   sendResponse(res, 201, reservationDTO as any);
 });
