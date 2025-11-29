@@ -32,7 +32,7 @@ exports.createRestriction = (0, catchAsync_1.default)(async (req, res, next) => 
 exports.testRestriction = (0, catchAsync_1.default)(async (req, res, next) => {
     const restriction = await restrictionModel_1.default.create(req.body);
     (0, snsMail_1.sendCancellationNotification)({
-        studentEmail: "krimster8@gmail.com",
+        studentEmail: "faramilan1@gmail.com",
         canteenName: "testt",
         reservationTime: "20",
     });

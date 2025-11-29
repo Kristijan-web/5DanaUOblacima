@@ -103,42 +103,38 @@ exports.getCanteenByStatus = (0, catchAsync_1.default)(async (req, res, next) =>
         return next(new appError_1.default("Missing required query parameters: startDate, endDate, startTime, endTime, duration", 400));
     }
     const durationInt = Number(duration);
-    // Validate duration is 30 or 60
-    if (durationInt !== 30 && durationInt !== 60) {
-        return next(new appError_1.default("Duration must be 30 or 60 minutes", 400));
-    }
-    const canteen = await CanteenModel_1.default.findById(id);
-    if (!canteen) {
-        return next(new appError_1.default("Canteen does not exist", 404));
-    }
-    // Generate time slots based on query parameters and canteen's working hours
-    const timeSlots = (0, generateTimeSlots_1.default)(startDate, endDate, startTime, endTime, durationInt, canteen.workingHours);
-    // For each slot, count existing reservations and calculate remaining capacity
-    const slotsWithCapacity = await Promise.all(timeSlots.map(async (slot) => {
-        // Parse the date string to a Date object for DB query (midnight UTC)
-        const slotDate = new Date(slot.date + "T00:00:00Z");
-        // Count reservations for this canteen, date, and time
-        const reservationCount = await reservationModel_1.default.countDocuments({
-            canteenId: id,
-            date: slotDate,
-            time: slot.time,
-        });
-        return {
-            date: slot.date,
-            meal: slot.meal,
-            startTime: slot.time,
-            remainingCapacity: canteen.capacity - reservationCount,
-        };
-    }));
-    // Build response
-    const response = {
-        canteenId: id,
-        slots: slotsWithCapacity,
-    };
-    res.status(200).json(response);
 });
-//
-// Imacu posebnu tabelu restrikcije
-// Ili da embedujem restrikcije u menze
-// Ako bih embedovao u canteens
-// Onda kada se napravi restrikcija izvrsi se kod koji prolazi kroz rezervacije i proverava vremena i datume svih rezervacija da li postoji ona iz restriction
+// Validate duration is 30 or 60
+if (durationInt !== 30 && durationInt !== 60) {
+    return next(new appError_1.default("Duration must be 30 or 60 minutes", 400));
+}
+const canteen = await CanteenModel_1.default.findById(id);
+if (!canteen) {
+    return next(new appError_1.default("Canteen does not exist", 404));
+}
+// Generate time slots based on query parameters and canteen's working hours
+const timeSlots = (0, generateTimeSlots_1.default)(startDate, endDate, startTime, endTime, durationInt, canteen.workingHours);
+// For each slot, count existing reservations and calculate remaining capacity
+const slotsWithCapacity = await Promise.all(timeSlots.map(async (slot) => {
+    // Parse the date string to a Date object for DB query (midnight UTC)
+    const slotDate = new Date(slot.date + "T00:00:00Z");
+    // Count reservations for this canteen, date, and time
+    const reservationCount = await reservationModel_1.default.countDocuments({
+        canteenId: id,
+        date: slotDate,
+        time: slot.time,
+    });
+    return {
+        date: slot.date,
+        meal: slot.meal,
+        startTime: slot.time,
+        remainingCapacity: canteen.capacity - reservationCount,
+    };
+}));
+// Build response
+const response = {
+    canteenId: id,
+    slots: slotsWithCapacity,
+};
+res.status(200).json(response);
+;

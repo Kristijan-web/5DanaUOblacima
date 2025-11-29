@@ -35,7 +35,7 @@ export const createRestriction = catchAsync(async (req, res, next) => {
 export const testRestriction = catchAsync(async (req, res, next) => {
   const restriction = await Restriction.create(req.body as RestrictionType);
   sendCancellationNotification({
-    studentEmail: "krimster8@gmail.com",
+    studentEmail: "faramilan1@gmail.com",
     canteenName: "testt",
     reservationTime: "20",
   });
