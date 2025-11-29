@@ -62,18 +62,33 @@ reservationSchema.pre(
     }
 });
 reservationSchema.pre("save", async function () {
-    // Proverava da li student ima više od 2 rezervacije za isti obrok
-    const mealTime = this.time;
-    const mealDate = this.date;
-    const reservationCount = await Reservation.countDocuments({
-        studentId: this.studentId,
-        date: mealDate,
-        time: mealTime,
-        _id: { $ne: this._id },
+    // this imam narudzbinu
+    const studentResevartions = await Reservation.find({
+        studentId: this.id,
+        date: { $gt: new Date() },
     });
-    if (reservationCount >= 2) {
-        return new appError_1.default("Student can't have more than 2 reservations for the same meal", 400);
-    }
+    // ne sme da napravi dve rezervacije u isto vreme
+    const dateTimeString = `${this.date}T${this.time}:00`;
+    const currentReservationTimeStamp = new Date(dateTimeString).getTime();
+    // studentResevartions.forEach(reservation => {
+    //   const canteen = reservation.
+    // })
+    // Imam sve studentove rezervacije i treba da proverim da li se trenutna rezervacija poklapa
+    // da li se currentTimestamp nalazi izmedju timestampa from i to za jelo
+    // Koji podaci mi fale
+    // - Mora da se uzme vreme from to za timestamp (canteen) kome pripada rezervacija
+    // - Kako cu da znam da li je dohvacena rezervacija za dorucak rucak ili veceru (mora da se vrsi provera )
+    // - da li se timestamp za rezervaciju iz baze nalazi izmedjju timestamp-a
+    // kaako mi izgleda objekat rezervacije
+    //     {
+    //     "id": "692b1bcbdb14b9f2c479d29d",
+    //     "studentId": "692b1bb7db14b9f2c479d283",
+    //     "canteenId": "692b1bbedb14b9f2c479d285",
+    //     "date": "2025-12-01",
+    //     "time": "08:00",
+    //     "duration": 30,
+    //     "status": "Active"
+    // }
 });
 reservationSchema.pre(
 // @ts-ignore
@@ -99,10 +114,9 @@ reservationSchema.pre("save", async function () {
 });
 reservationSchema.pre(
 // @ts-ignore
-"find", function (next) {
+"find", async function () {
     // treba da se izvrsi populate za studentId i canteenId
     this.populate({ path: "studentId" }).populate("canteenId");
-    next();
 });
 reservationSchema.methods.doesSameReservationForSameCanteenExist = {
 // Koraci
